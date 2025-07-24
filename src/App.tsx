@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import Papa from "papaparse";
-import { LineChart } from "@mui/x-charts/LineChart";
+import { VegaLite } from "react-vega";
 
 function App() {
   const [data, setData] = useState<any[]>([]);
@@ -61,7 +61,6 @@ async function getData(): Promise<any[]> {
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
-      preview: 10000,
       transform: (value, header) => {
         // transform "date" to Dates
         if (header === "date") {
@@ -84,55 +83,20 @@ async function getData(): Promise<any[]> {
 }
 
 function Charts({ data }: { data: any[] }) {
-  const pivotedData = pivot(data, "median");
+  const spec = {
+    data: { name: "table" },
+    mark: "line",
+    encoding: {
+      x: { field: "date", type: "temporal" },
+      y: { field: "median", type: "quantitative" },
+      color: { field: "state", type: "nominal", legend: null },
+    },
+  };
 
   return (
     <div>
       <h2>Charts</h2>
-      <LineChart
-        dataset={pivotedData}
-        xAxis={[
-          {
-            dataKey: "date",
-            scaleType: "time",
-            valueFormatter: (date) => date.toISOString().slice(0, 10),
-          },
-        ]}
-        series={[
-          { dataKey: "Alabama", label: "Alabama", showMark: false },
-          { dataKey: "Colorado", label: "Colorado", showMark: false },
-        ]}
-      />
-      {data.map((item, index) => (
-        <div key={index}>
-          <p>{JSON.stringify(item)}</p>
-        </div>
-      ))}
+      <VegaLite spec={spec} data={{ table: data }} />
     </div>
   );
-}
-
-function pivot(data: object[], y_key: string): object[] {
-  // The data start in a form like { state: "AL", date: "2024-01-01", y: 0}, ...
-  // Transform to a form like { date: "2024-01-01", AL: 0, ... }
-
-  const pivoted: { [key: string]: any } = {};
-
-  data.forEach((item) => {
-    const record = item as any;
-    const dateKey = record.date;
-    const stateKey = record.state;
-    const yValue = record[y_key];
-
-    // Initialize the date entry if it doesn't exist
-    if (!pivoted[dateKey]) {
-      pivoted[dateKey] = { date: dateKey };
-    }
-
-    // Add the state's y value to this date
-    pivoted[dateKey][stateKey] = yValue;
-  });
-
-  // Convert object back to array
-  return Object.values(pivoted);
 }
