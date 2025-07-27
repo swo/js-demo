@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import Papa from "papaparse";
-import { VegaLite } from "react-vega";
+import { LineChart } from "@mui/x-charts/LineChart";
+import _ from "lodash";
+import { Typography } from "@mui/material";
 
 function App() {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,11 +15,11 @@ function App() {
       try {
         setLoading(true);
         const result = await getData();
-        setData(result);
+        setData(cleanData(result));
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
-        setData([]);
+        setData({});
       } finally {
         setLoading(false);
       }
@@ -37,7 +39,7 @@ function App() {
   return (
     <>
       <h1>Rt estimates</h1>
-      <Charts data={data} />
+      <Charts dataset={data.dataset} series={data.series} />
     </>
   );
 }
@@ -82,21 +84,56 @@ async function getData(): Promise<any[]> {
   }
 }
 
-function Charts({ data }: { data: any[] }) {
-  const spec = {
-    data: { name: "table" },
-    mark: "line",
-    encoding: {
-      x: { field: "date", type: "temporal" },
-      y: { field: "median", type: "quantitative" },
-      color: { field: "state", type: "nominal", legend: null },
-    },
-  };
+function cleanData(data: any[]): { dataset: any[]; series: any[] } {
+  // Transform data from an array of row objects to a format suitable for
+  // MUI charts using Lodash
 
+  // Transform dates into ISO strings
+  data.forEach((row) => {
+    if (row.date instanceof Date) {
+      row.date = row.date.toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
+    }
+  });
+
+  // Get all dates
+  const dates = _.uniq(data.map((x) => x.date));
+  const states = _.uniq(data.map((x) => x.state));
+  // return <Typography>Dates: {JSON.stringify(states)}</Typography>;
+
+  // Create a dataset like: [{date: "2020-01-01", Alaska: 0.1, Alabama, 0.2, ...}, ...]
+  const dataset = dates.map((date) => {
+    const row: any = { date: new Date(date) };
+    states.forEach((state) => {
+      const value = _.get(_.find(data, { date, state }), "median", null);
+      row[state] = value;
+    });
+    return row;
+  });
+
+  // Create a series object like: [{datakey: "Alaska"}, {datakey: "Alabama"}, ...]
+  const series = states.map((state) => ({
+    dataKey: state,
+    label: state,
+    showMark: false,
+  }));
+
+  return { dataset, series };
+}
+
+function Charts({ dataset, series }: { dataset: any[]; series: any[] }) {
   return (
-    <div>
-      <h2>Charts</h2>
-      <VegaLite spec={spec} data={{ table: data }} />
-    </div>
+    <LineChart
+      height={500}
+      dataset={dataset}
+      xAxis={[
+        {
+          dataKey: "date",
+          scaleType: "time",
+          valueFormatter: (v) => v.toLocaleDateString(),
+        },
+      ]}
+      series={series}
+      slotProps={{ tooltip: { trigger: "item" } }}
+    />
   );
 }
