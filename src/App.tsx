@@ -3,12 +3,12 @@ import "./App.css";
 import Papa from "papaparse";
 import { LineChart } from "@mui/x-charts/LineChart";
 import _ from "lodash";
-import { Typography } from "@mui/material";
 
 function App() {
   const [data, setData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const topoData = getTopoData();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,6 +45,14 @@ function App() {
 }
 
 export default App;
+
+async function getTopoData(): Promise<any> {
+  const response = await fetch(
+    "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
+  );
+  const topoData = await response.json();
+  return topoData;
+}
 
 async function getData(): Promise<any[]> {
   const url =
@@ -85,6 +93,7 @@ async function getData(): Promise<any[]> {
 }
 
 function cleanData(data: any[]): { dataset: any[]; series: any[] } {
+  console.log("Cleaning");
   // Transform data from an array of row objects to a format suitable for
   // MUI charts using Lodash
 
