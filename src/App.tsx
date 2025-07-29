@@ -3,44 +3,23 @@ import "./App.css";
 import Papa from "papaparse";
 import { LineChart } from "@mui/x-charts/LineChart";
 import _ from "lodash";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { BarChart } from "@mui/x-charts";
 
 function App() {
-  const [data, setData] = useState<any>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const topoData = getTopoData();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const result = await getData();
-        setData(cleanData(result));
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-        setData({});
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return <div>Loading data...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  const theme = createTheme({
+    colorSchemes: {
+      dark: true,
+    },
+  });
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <h1>Rt estimates</h1>
-      <Charts dataset={data.dataset} series={data.series} />
-    </>
+      <Charts />
+    </ThemeProvider>
   );
 }
 
@@ -54,7 +33,7 @@ async function getTopoData(): Promise<any> {
   return topoData;
 }
 
-async function getData(): Promise<any[]> {
+async function fetchStateData(): Promise<any[]> {
   const url =
     "https://raw.githubusercontent.com/epiforecasts/covid-rt-estimates/refs/heads/master/subnational/united-states/cases/summary/rt.csv";
 
@@ -92,7 +71,19 @@ async function getData(): Promise<any[]> {
   }
 }
 
-function cleanData(data: any[]): { dataset: any[]; series: any[] } {
+type stateDataType = {
+  temporal: {
+    series: { dataKey: string }[];
+    // dataset is like [{date: "2020-01-01", Alaska: 0.1, Alabama, 0.2, ...}, ...]
+    dataset: any[];
+  };
+  summary: {
+    series: { dataKey: string }[];
+    dataset: { state: string; value: number }[];
+  };
+};
+
+function cleanStateData(data: any[]): stateDataType {
   console.log("Cleaning");
   // Transform data from an array of row objects to a format suitable for
   // MUI charts using Lodash
@@ -107,10 +98,9 @@ function cleanData(data: any[]): { dataset: any[]; series: any[] } {
   // Get all dates
   const dates = _.uniq(data.map((x) => x.date));
   const states = _.uniq(data.map((x) => x.state));
-  // return <Typography>Dates: {JSON.stringify(states)}</Typography>;
 
-  // Create a dataset like: [{date: "2020-01-01", Alaska: 0.1, Alabama, 0.2, ...}, ...]
-  const dataset = dates.map((date) => {
+  // Create a dataset like: [{date: 2020-01-01, Alaska: 0.1, Alabama, 0.2, ...}, ...]
+  const temporalDataset = dates.map((date) => {
     const row: any = { date: new Date(date) };
     states.forEach((state) => {
       const value = _.get(_.find(data, { date, state }), "median", null);
@@ -120,29 +110,71 @@ function cleanData(data: any[]): { dataset: any[]; series: any[] } {
   });
 
   // Create a series object like: [{datakey: "Alaska"}, {datakey: "Alabama"}, ...]
-  const series = states.map((state) => ({
+  const temporalSeries = states.map((state) => ({
     dataKey: state,
     label: state,
     showMark: false,
   }));
 
-  return { dataset, series };
+  // Create a summary dataset like: [{state: "Alaska", value: 0.1}, {state: "Alabama", value: 0.2}, ...]
+  const summaryDataset = states.map((state) => {
+    const value = _.meanBy(
+      data.filter((x) => x.state === state),
+      (x) => x.median
+    );
+    return { state, value };
+  });
+
+  const summarySeries = [{ dataKey: "value" }];
+
+  return {
+    temporal: { dataset: temporalDataset, series: temporalSeries },
+    summary: { dataset: summaryDataset, series: summarySeries },
+  };
 }
 
-function Charts({ dataset, series }: { dataset: any[]; series: any[] }) {
+function Charts() {
+  const [stateData, setStateData] = useState<stateDataType | null>(null);
+  const topoData = getTopoData();
+
+  useEffect(() => {
+    const getStateData = async () => {
+      const data = await fetchStateData();
+      const cleanedData = cleanStateData(data);
+      setStateData(cleanedData);
+    };
+
+    getStateData();
+  }, []);
+
+  if (!stateData) {
+    return <div>Loading data...</div>;
+  }
+
   return (
-    <LineChart
-      height={500}
-      dataset={dataset}
-      xAxis={[
-        {
-          dataKey: "date",
-          scaleType: "time",
-          valueFormatter: (v) => v.toLocaleDateString(),
-        },
-      ]}
-      series={series}
-      slotProps={{ tooltip: { trigger: "item" } }}
-    />
+    <>
+      <LineChart
+        height={500}
+        dataset={stateData.temporal.dataset}
+        xAxis={[
+          {
+            dataKey: "date",
+            scaleType: "time",
+            valueFormatter: (v) => v.toLocaleDateString(),
+          },
+        ]}
+        series={stateData.temporal.series}
+        slotProps={{ tooltip: { trigger: "item" } }}
+      />
+
+      <BarChart
+        height={800}
+        layout="horizontal"
+        dataset={stateData.summary.dataset}
+        yAxis={[{ dataKey: "state" }]}
+        series={stateData.summary.series}
+        // slotProps={{ tooltip: { trigger: "item" } }}
+      />
+    </>
   );
 }
