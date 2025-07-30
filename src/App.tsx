@@ -106,6 +106,7 @@ function cleanStateData(data: any[]): stateDataType {
     dataKey: state,
     label: state,
     showMark: false,
+    color: "gray",
   }));
 
   // Create a summary dataset like: [{state: "Alaska", value: 0.1}, {state: "Alabama", value: 0.2}, ...]
@@ -126,17 +127,28 @@ function cleanStateData(data: any[]): stateDataType {
 }
 
 function Dashboard() {
+  const [selectedState, setSelectedState] = useState<string | null>(null);
   return (
     <>
-      <StateHexMap data={stateHexData} />
-      <Charts />
+      <StateHexMap
+        data={stateHexData}
+        selectedState={selectedState}
+        setSelectedState={setSelectedState}
+      />
+      <Charts selectedState={selectedState} />
     </>
   );
 }
 
-function StateHexMap({ data }: { data: any[] }) {
-  const [selectedState, setSelectedState] = useState<string | null>(null);
-
+function StateHexMap({
+  data,
+  selectedState,
+  setSelectedState,
+}: {
+  data: any[];
+  selectedState: string | null;
+  setSelectedState: (state: string | null) => void;
+}) {
   function handleMouseEnter(state: string) {
     return () => {
       setSelectedState(state);
@@ -178,7 +190,7 @@ function StateHexMap({ data }: { data: any[] }) {
   );
 }
 
-function Charts() {
+function Charts({ selectedState }: { selectedState: string | null }) {
   const [stateData, setStateData] = useState<stateDataType | null>(null);
 
   useEffect(() => {
@@ -195,6 +207,18 @@ function Charts() {
     return <div>Loading data...</div>;
   }
 
+  const temporalSeries = selectedState
+    ? [
+        ...stateData.temporal.series,
+        {
+          state: selectedState,
+          dataKey: selectedState,
+          color: "red",
+          showMark: false,
+        },
+      ]
+    : stateData.temporal.series;
+
   return (
     <>
       <LineChart
@@ -207,8 +231,9 @@ function Charts() {
             valueFormatter: (v) => v.toLocaleDateString(),
           },
         ]}
-        series={stateData.temporal.series}
+        series={temporalSeries}
         slotProps={{ tooltip: { trigger: "item" } }}
+        hideLegend={true}
       />
 
       <BarChart
