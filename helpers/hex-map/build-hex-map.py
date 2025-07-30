@@ -5,7 +5,7 @@ import polars as pl
 
 precision = 2
 
-state_positions = pl.read_csv("helpers/hex_map/hex_positions.csv")
+state_positions = pl.read_csv("helpers/hex-map/hex-positions.csv")
 
 data = (
     state_positions.rename({"abbreviation": "id"})
