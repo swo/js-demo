@@ -5,14 +5,10 @@ import polars as pl
 
 precision = 2
 
+state_positions = pl.read_csv("helpers/hex_map/hex_positions.csv")
+
 data = (
-    pl.DataFrame(
-        # use axial coordinates
-        [(q, r) for q in range(6) for r in range(6)],
-        schema=["q", "r"],
-        orient="row",
-    )
-    .with_row_index("id")
+    state_positions.rename({"abbreviation": "id"})
     .with_columns(
         # get the centers for each hexagon
         x0=np.sqrt(3.0) * pl.col("q") + np.sqrt(3.0) / 2.0 * pl.col("r"),
@@ -37,7 +33,6 @@ print("Max y:", data.select(pl.col("y").max()).item())
 hex_data = (
     data.with_columns(pl.col(["x", "y"]).round(precision))
     .with_columns(points=pl.concat_str(["x", "y"], separator=","))
-    .with_columns(id=pl.concat_str(["q", "r"], separator=","))
     .sort("id", "order")
     .group_by("id", "x0", "y0")
     .agg(pl.col("points"))

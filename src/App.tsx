@@ -139,7 +139,7 @@ function StateHexMap({ data }: { data: any[] }) {
     <svg
       width="400"
       height="400"
-      viewBox="-0.1 -0.1 15 15"
+      viewBox="-0.1 -0.1 26 26"
       className="state-hex-map"
     >
       {data.map((state) => (
