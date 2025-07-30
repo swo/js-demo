@@ -1,0 +1,59 @@
+state,abbreviation,q,r
+Alabama,AL,0,2
+Alaska,AK,-5,-3
+Arizona,AZ,-4,2
+Arkansas,AR,-1,1
+California,CA,-5,1
+Colorado,CO,-3,0
+Connecticut,CT,5,-1
+Delaware,DE,4,0
+District of Columbia,DC,2,0
+Florida,FL,0,3
+Georgia,GA,1,2
+Hawaii,HI,-8,3
+Idaho,ID,-4,-1
+Illinois,IL,0,-1
+Indiana,IN,1,-1
+Iowa,IA,-1,-1
+Kansas,KS,-2,1
+Kentucky,KY,0,0
+Louisiana,LA,-2,2
+Maine,ME,7,-4
+Maryland,MD,3,0
+Massachusetts,MA,5,-2
+Michigan,MI,2,-2
+Minnesota,MN,-1,-2
+Mississippi,MS,-1,2
+Missouri,MO,-1,0
+Montana,MT,-3,-2
+Nebraska,NE,-2,0
+New Hampshire,NH,6,-3
+New Jersey,NJ,4,-1
+New Mexico,NM,-3,1
+New York,NY,4,-2
+North Carolina,NC,2,1
+North Dakota,ND,-2,-2
+Nevada,NV,-4,0
+Ohio,OH,2,-1
+Oklahoma,OK,-3,2
+Oregon,OR,-5,0
+Pennsylvania,PA,3,-1
+Rhode Island,RI,6,-2
+South Carolina,SC,1,1
+South Dakota,SD,-2,-1
+Tennessee,TN,0,1
+Texas,TX,-3,3
+Utah,UT,-4,1
+Vermont,VT,5,-3
+Virginia,VA,3,1
+Washington,WA,-4,-2
+West Virginia,WV,1,0
+Wisconsin,WI,0,-2
+Wyoming,WY,-3,-1
+American Samoa,AS,-10,5
+Guam,GU,-9,5
+Puerto Rico PR,PR,-8,5
+U.S. Virgin Islands,VI,-7,5
+Micronesia,FM,-5,5
+Marshall Islands,MH,-4,5
+Palau,PW,-3,5

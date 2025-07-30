@@ -6,6 +6,7 @@ import _ from "lodash";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { BarChart } from "@mui/x-charts";
+import stateHexData from "./data/state-hex.tsx";
 
 function App() {
   const theme = createTheme({
@@ -18,20 +19,12 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <h1>Rt estimates</h1>
-      <Charts />
+      <Dashboard />
     </ThemeProvider>
   );
 }
 
 export default App;
-
-async function getTopoData(): Promise<any> {
-  const response = await fetch(
-    "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
-  );
-  const topoData = await response.json();
-  return topoData;
-}
 
 async function fetchStateData(): Promise<any[]> {
   const url =
@@ -84,7 +77,6 @@ type stateDataType = {
 };
 
 function cleanStateData(data: any[]): stateDataType {
-  console.log("Cleaning");
   // Transform data from an array of row objects to a format suitable for
   // MUI charts using Lodash
 
@@ -114,6 +106,7 @@ function cleanStateData(data: any[]): stateDataType {
     dataKey: state,
     label: state,
     showMark: false,
+    color: "gray",
   }));
 
   // Create a summary dataset like: [{state: "Alaska", value: 0.1}, {state: "Alabama", value: 0.2}, ...]
@@ -133,9 +126,72 @@ function cleanStateData(data: any[]): stateDataType {
   };
 }
 
-function Charts() {
+function Dashboard() {
+  const [selectedState, setSelectedState] = useState<string | null>(null);
+  return (
+    <>
+      <StateHexMap
+        data={stateHexData}
+        selectedState={selectedState}
+        setSelectedState={setSelectedState}
+      />
+      <Charts selectedState={selectedState} />
+    </>
+  );
+}
+
+function StateHexMap({
+  data,
+  selectedState,
+  setSelectedState,
+}: {
+  data: any[];
+  selectedState: string | null;
+  setSelectedState: (state: string | null) => void;
+}) {
+  function handleMouseEnter(state: string) {
+    return () => {
+      setSelectedState(state);
+    };
+  }
+
+  return (
+    <svg
+      width="600"
+      height="400"
+      viewBox="-0.1 -0.1 24 16"
+      className="state-hex-map"
+    >
+      {data.map((state) => (
+        <polygon
+          key={`polygon-${state.abbreviation}`}
+          points={state.points}
+          fill={state.state === selectedState ? "red" : "gray"}
+          stroke="blue"
+          strokeWidth={0.1}
+          onMouseEnter={handleMouseEnter(state.state)}
+          onMouseLeave={() => setSelectedState(null)}
+        />
+      ))}
+      {data.map((state) => (
+        <text
+          key={`label-${state.abbreviation}`}
+          x={state.x0}
+          y={state.y0}
+          textAnchor="middle"
+          alignmentBaseline="central"
+          fontSize={0.75}
+          pointerEvents="none"
+        >
+          {state.abbreviation}
+        </text>
+      ))}
+    </svg>
+  );
+}
+
+function Charts({ selectedState }: { selectedState: string | null }) {
   const [stateData, setStateData] = useState<stateDataType | null>(null);
-  const topoData = getTopoData();
 
   useEffect(() => {
     const getStateData = async () => {
@@ -151,6 +207,18 @@ function Charts() {
     return <div>Loading data...</div>;
   }
 
+  const temporalSeries = selectedState
+    ? [
+        ...stateData.temporal.series,
+        {
+          state: selectedState,
+          dataKey: selectedState,
+          color: "red",
+          showMark: false,
+        },
+      ]
+    : stateData.temporal.series;
+
   return (
     <>
       <LineChart
@@ -163,8 +231,9 @@ function Charts() {
             valueFormatter: (v) => v.toLocaleDateString(),
           },
         ]}
-        series={stateData.temporal.series}
+        series={temporalSeries}
         slotProps={{ tooltip: { trigger: "item" } }}
+        hideLegend={true}
       />
 
       <BarChart
@@ -173,7 +242,6 @@ function Charts() {
         dataset={stateData.summary.dataset}
         yAxis={[{ dataKey: "state" }]}
         series={stateData.summary.series}
-        // slotProps={{ tooltip: { trigger: "item" } }}
       />
     </>
   );
