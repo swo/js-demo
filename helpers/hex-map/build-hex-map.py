@@ -8,8 +8,7 @@ precision = 2
 state_positions = pl.read_csv("helpers/hex-map/hex-positions.csv")
 
 data = (
-    state_positions.rename({"abbreviation": "id"})
-    .with_columns(
+    state_positions.with_columns(
         # get the centers for each hexagon
         x0=np.sqrt(3.0) * pl.col("q") + np.sqrt(3.0) / 2.0 * pl.col("r"),
         y0=3.0 / 2 * pl.col("r"),
@@ -33,8 +32,8 @@ print("Max y:", data.select(pl.col("y").max()).item())
 hex_data = (
     data.with_columns(pl.col(["x", "y"]).round(precision))
     .with_columns(points=pl.concat_str(["x", "y"], separator=","))
-    .sort("id", "order")
-    .group_by("id", "x0", "y0")
+    .sort("abbreviation", "order")
+    .group_by("state", "abbreviation", "x0", "y0")
     .agg(pl.col("points"))
     .with_columns(pl.col("points").list.join(" "))
 )

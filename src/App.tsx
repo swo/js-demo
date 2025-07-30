@@ -135,33 +135,43 @@ function Dashboard() {
 }
 
 function StateHexMap({ data }: { data: any[] }) {
+  const [selectedState, setSelectedState] = useState<string | null>(null);
+
+  function handleMouseEnter(state: string) {
+    return () => {
+      setSelectedState(state);
+    };
+  }
+
   return (
     <svg
-      width="400"
+      width="600"
       height="400"
-      viewBox="-0.1 -0.1 26 26"
+      viewBox="-0.1 -0.1 24 16"
       className="state-hex-map"
     >
       {data.map((state) => (
         <polygon
-          key={state.abbreviation}
+          key={`polygon-${state.abbreviation}`}
           points={state.points}
-          // className="state-hex"
-          fill="red"
+          fill={state.state === selectedState ? "red" : "gray"}
           stroke="blue"
           strokeWidth={0.1}
-          // title={state.State}
+          onMouseEnter={handleMouseEnter(state.state)}
+          onMouseLeave={() => setSelectedState(null)}
         />
       ))}
       {data.map((state) => (
         <text
+          key={`label-${state.abbreviation}`}
           x={state.x0}
           y={state.y0}
           textAnchor="middle"
           alignmentBaseline="central"
           fontSize={0.75}
+          pointerEvents="none"
         >
-          {state.id}
+          {state.abbreviation}
         </text>
       ))}
     </svg>
@@ -207,7 +217,6 @@ function Charts() {
         dataset={stateData.summary.dataset}
         yAxis={[{ dataKey: "state" }]}
         series={stateData.summary.series}
-        // slotProps={{ tooltip: { trigger: "item" } }}
       />
     </>
   );

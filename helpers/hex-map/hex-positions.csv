@@ -1,59 +1,59 @@
-abbreviation,q,r
-AL,0,2
-AK,-5,-3
-AZ,-4,2
-AR,-1,1
-CA,-5,1
-CO,-3,0
-CT,5,-1
-DE,4,0
-DC,2,0
-FL,0,3
-GA,1,2
-HI,-8,3
-ID,-4,-1
-IL,0,-1
-IN,1,-1
-IA,-1,-1
-KS,-2,1
-KY,0,0
-LA,-2,2
-ME,7,-4
-MD,3,0
-MA,5,-2
-MI,2,-2
-MN,-1,-2
-MS,-1,2
-MO,-1,0
-MT,-3,-2
-NE,-2,0
-NH,6,-3
-NJ,4,-1
-NM,-3,1
-NY,4,-2
-NC,2,1
-ND,-2,-2
-NV,-4,0
-OH,2,-1
-OK,-3,2
-OR,-5,0
-PA,3,-1
-RI,6,-2
-SC,1,1
-SD,-2,-1
-TN,0,1
-TX,-3,3
-UT,-4,1
-VT,5,-3
-VA,3,1
-WA,-4,-2
-WV,1,0
-WI,0,-2
-WY,-3,-1
-AS,-10,5
-GU,-9,5
-PR,-8,5
-VI,-7,5
-FM,-5,5
-MH,-4,5
-Pw,-3,5
+state,abbreviation,q,r
+Alabama,AL,0,2
+Alaska,AK,-5,-3
+Arizona,AZ,-4,2
+Arkansas,AR,-1,1
+California,CA,-5,1
+Colorado,CO,-3,0
+Connecticut,CT,5,-1
+Delaware,DE,4,0
+District of Columbia,DC,2,0
+Florida,FL,0,3
+Georgia,GA,1,2
+Hawaii,HI,-8,3
+Idaho,ID,-4,-1
+Illinois,IL,0,-1
+Indiana,IN,1,-1
+Iowa,IA,-1,-1
+Kansas,KS,-2,1
+Kentucky,KY,0,0
+Louisiana,LA,-2,2
+Maine,ME,7,-4
+Maryland,MD,3,0
+Massachusetts,MA,5,-2
+Michigan,MI,2,-2
+Minnesota,MN,-1,-2
+Mississippi,MS,-1,2
+Missouri,MO,-1,0
+Montana,MT,-3,-2
+Nebraska,NE,-2,0
+New Hampshire,NH,6,-3
+New Jersey,NJ,4,-1
+New Mexico,NM,-3,1
+New York,NY,4,-2
+North Carolina,NC,2,1
+North Dakota,ND,-2,-2
+Nevada,NV,-4,0
+Ohio,OH,2,-1
+Oklahoma,OK,-3,2
+Oregon,OR,-5,0
+Pennsylvania,PA,3,-1
+Rhode Island,RI,6,-2
+South Carolina,SC,1,1
+South Dakota,SD,-2,-1
+Tennessee,TN,0,1
+Texas,TX,-3,3
+Utah,UT,-4,1
+Vermont,VT,5,-3
+Virginia,VA,3,1
+Washington,WA,-4,-2
+West Virginia,WV,1,0
+Wisconsin,WI,0,-2
+Wyoming,WY,-3,-1
+American Samoa,AS,-10,5
+Guam,GU,-9,5
+Puerto Rico PR,PR,-8,5
+U.S. Virgin Islands,VI,-7,5
+Micronesia,FM,-5,5
+Marshall Islands,MH,-4,5
+Palau,PW,-3,5
