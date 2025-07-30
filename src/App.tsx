@@ -6,6 +6,7 @@ import _ from "lodash";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { BarChart } from "@mui/x-charts";
+import stateHexData from "./data/state-hex.tsx";
 
 function App() {
   const theme = createTheme({
@@ -18,20 +19,12 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <h1>Rt estimates</h1>
-      <Charts />
+      <Dashboard />
     </ThemeProvider>
   );
 }
 
 export default App;
-
-async function getTopoData(): Promise<any> {
-  const response = await fetch(
-    "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
-  );
-  const topoData = await response.json();
-  return topoData;
-}
 
 async function fetchStateData(): Promise<any[]> {
   const url =
@@ -84,7 +77,6 @@ type stateDataType = {
 };
 
 function cleanStateData(data: any[]): stateDataType {
-  console.log("Cleaning");
   // Transform data from an array of row objects to a format suitable for
   // MUI charts using Lodash
 
@@ -133,9 +125,51 @@ function cleanStateData(data: any[]): stateDataType {
   };
 }
 
+function Dashboard() {
+  return (
+    <>
+      <StateHexMap data={stateHexData} />
+      <Charts />
+    </>
+  );
+}
+
+function StateHexMap({ data }: { data: any[] }) {
+  return (
+    <svg
+      width="400"
+      height="400"
+      viewBox="-0.1 -0.1 15 15"
+      className="state-hex-map"
+    >
+      {data.map((state) => (
+        <polygon
+          key={state.abbreviation}
+          points={state.points}
+          // className="state-hex"
+          fill="red"
+          stroke="blue"
+          strokeWidth={0.1}
+          // title={state.State}
+        />
+      ))}
+      {data.map((state) => (
+        <text
+          x={state.x0}
+          y={state.y0}
+          textAnchor="middle"
+          alignmentBaseline="central"
+          fontSize={0.75}
+        >
+          {state.id}
+        </text>
+      ))}
+    </svg>
+  );
+}
+
 function Charts() {
   const [stateData, setStateData] = useState<stateDataType | null>(null);
-  const topoData = getTopoData();
 
   useEffect(() => {
     const getStateData = async () => {
