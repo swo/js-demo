@@ -26,6 +26,12 @@ function App() {
 
 export default App;
 
+let DATA_CACHE: stateDataType | null = null;
+async function getStateData() {
+  DATA_CACHE = DATA_CACHE || cleanStateData(await fetchStateData());
+  return DATA_CACHE;
+}
+
 async function fetchStateData(): Promise<any[]> {
   const url =
     "https://raw.githubusercontent.com/epiforecasts/covid-rt-estimates/refs/heads/master/subnational/united-states/cases/summary/rt.csv";
@@ -194,13 +200,9 @@ function Charts({ selectedState }: { selectedState: string | null }) {
   const [stateData, setStateData] = useState<stateDataType | null>(null);
 
   useEffect(() => {
-    const getStateData = async () => {
-      const data = await fetchStateData();
-      const cleanedData = cleanStateData(data);
-      setStateData(cleanedData);
-    };
-
-    getStateData();
+    (async () => {
+      setStateData(await getStateData());
+    })();
   }, []);
 
   if (!stateData) {
